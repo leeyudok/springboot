@@ -1,3 +1,16 @@
 bin/
+
+
+
+build/
+
 application.properties
+application-local.properties
+
 demo/target/
+
+
+.gradle/
+gradle/
+gradlew
+gradlew.bat
