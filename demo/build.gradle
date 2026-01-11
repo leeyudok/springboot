@@ -13,18 +13,37 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation('org.springframework.boot:spring-boot-starter-web') {
+        exclude module: 'spring-boot-starter-logging'
+    }
+    implementation 'ch.qos.logback:logback-classic:1.2.13'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+bootRun {
+    systemProperties = [ 'file.encoding': 'UTF-8' ]
+    sourceResources sourceSets.main
 }
 
 test {
     useJUnitPlatform()
+    options {
+        systemProperties(System.getProperties())
+        systemProperties.remove("java.awt.headless")
+    }
+    systemProperty 'file.encoding', 'UTF-8'
+}
+
+tasks.withType(JavaCompile){
+    options.encoding = "UTF-8"
 }

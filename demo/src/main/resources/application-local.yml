@@ -1,0 +1,13 @@
+server:
+  port: 8000
+spring:
+  devtools:
+      restart:
+        enabled: true
+        additional-paths: src/main/resources/static
+      livereload:
+        enabled: true
+  web:
+    resources:
+      cache:
+        period: 0

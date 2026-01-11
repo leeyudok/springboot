@@ -1,6 +1,6 @@
 bin/
 
-
+logs/
 
 build/
 
@@ -14,3 +14,4 @@ demo/target/
 gradle/
 gradlew
 gradlew.bat
+demo/users.json

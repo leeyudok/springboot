@@ -1,0 +1,31 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+end_of_line = lf
+
+[*.java]
+indent_size = 4
+insert_final_newline = true
+
+[*.gradle]
+indent_size = 4
+
+[*.xml]
+indent_size = 2
+
+[*.properties]
+indent_size = -1 # Use default editor indent size for properties files
+
+[*.yml]
+indent_size = 2
+
+[*.json]
+indent_size = 2

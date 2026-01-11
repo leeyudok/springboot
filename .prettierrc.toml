@@ -1,0 +1,38 @@
+# .prettierrc.toml
+# Prettier configuration for the project
+
+# Maximum line length
+printWidth = 120
+
+# Number of spaces per indentation level
+tabWidth = 4
+
+# Indent lines with tabs instead of spaces
+useTabs = false
+
+# Print semicolons at the end of statements
+semi = true
+
+# Use single quotes instead of double quotes
+singleQuote = false
+
+# Print trailing commas wherever possible in multi-line comma-separated syntax structures
+trailingComma = "es5"
+
+# Print spaces between brackets in object literals
+bracketSpacing = true
+
+# Put the > of a multi-line HTML (HTML, XML, JSX) element at the end of the last line instead of being alone on the next line
+bracketSameLine = false
+
+# Include parentheses around a sole arrow function parameter.
+arrowParens = "always"
+
+# Specify the parser to use
+# For Java, Prettier usually relies on external plugins or is run on generated files.
+# For files like JSON, XML, Markdown, etc., default parsers are often sufficient.
+# For .toml, it's typically parsed as TOML.
+# parser = "toml" # This might be inferred or handled by a plugin if available
+
+# Ensure newline at the end of file
+endOfLine = "lf"
