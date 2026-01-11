@@ -7,6 +7,7 @@
 - **언어:** Java 8
 - **프레임워크:** Spring Boot 2.7.18
 - **웹 서버:** 임베디드 Tomcat (`spring-boot-starter-web`에 포함)
+- **검색엔진:** OpenSearch
 
 ## 프론트엔드
 
@@ -22,3 +23,8 @@
 - `logback-classic`: Java용 강력한 로깅 프레임워크.
 - `lombok`: 모델/데이터 객체의 상용구 코드를 줄여주는 라이브러리.
 - `spring-boot-devtools`: 자동 재시작 및 라이브 리로드와 같은 개발 시간 기능을 제공합니다.
+
+
+## 기타
+
+http://localhost:8000/swagger-ui/index.html

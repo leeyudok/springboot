@@ -3,6 +3,8 @@ package com.example.demo.controller;
 import com.example.demo.dto.User;
 import com.example.demo.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +23,8 @@ public class UserController {
         this.userService = userService;
     }
 
+    @Operation(summary = "Get all users", description = "Returns a list of all users.")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved list of users.")
     @GetMapping("/users")
     public List<User> getUsers() {
         List<User> users = userService.getUsers();
@@ -28,6 +32,7 @@ public class UserController {
         return users;
     }
 
+    @Operation(summary = "Generate users.json file", description = "Generates a JSON file containing all users.")
     @GetMapping("/gen-users")
     public String generateUsersFile() {
         List<User> users = userService.getUsers();
