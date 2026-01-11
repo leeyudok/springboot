@@ -23,8 +23,8 @@ public class UserController {
         this.userService = userService;
     }
 
-    @Operation(summary = "Get all users", description = "Returns a list of all users.")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved list of users.")
+    @Operation(summary = "사용자 전체목록 조회", description = "ㅋ Returns a list of all users.")
+    @ApiResponse(responseCode = "200", description = "성공")
     @GetMapping("/users")
     public List<User> getUsers() {
         List<User> users = userService.getUsers();
