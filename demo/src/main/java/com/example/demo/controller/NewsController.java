@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * 뉴스 조회 API.
+ */
 @RestController
 public class NewsController {
 
@@ -18,6 +21,7 @@ public class NewsController {
         this.newsService = newsService;
     }
 
+    /** 실시간 뉴스 기사 목록을 반환한다 (시뮬레이션 데이터). */
     @Operation(summary = "Get real-time news", description = "Returns a list of real-time news articles.")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved list of news articles.")
     @GetMapping("/news")

@@ -8,9 +8,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * 샘플 사용자 데이터 생성 서비스.
+ * 한국 가수 이름 목록을 기반으로 매 호출마다 랜덤 사용자 목록을 만든다.
+ */
 @Service
 public class UserService {
 
+    /** 샘플 이름 풀 — 인원수는 이 목록 크기를 따라간다 */
     private static final List<String> KOREAN_SINGER_NAMES = Arrays.asList(
             "K.Will", "카이 (Kai)", "강다니엘 (Kang Daniel)", "강승윤 (Kang Seung-yoon)", "강타 (Kangta)",
             "키 (Key)", "기현 (Kihyun)", "김동한 (Kim Dong-han)", "김동준 (Kim Dong-jun)", "에디킴 (Eddy Kim)",
@@ -27,30 +32,27 @@ public class UserService {
     private static final List<String> DEPARTMENTS = Arrays.asList("개발부", "기획부", "디자인부", "마케팅부", "인사부");
     private static final List<String> TEAMS = Arrays.asList("A팀", "B팀", "C팀", "D팀", "E팀");
 
+    /** 전체 사용자 목록을 생성해 반환한다 (연락처·부서·팀은 호출마다 랜덤). */
     public List<User> getUsers() {
         List<User> users = new ArrayList<>();
         Random random = new Random();
 
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < KOREAN_SINGER_NAMES.size(); i++) {
             long id = i + 1;
             String name = KOREAN_SINGER_NAMES.get(i);
             String email = name.replaceAll("[^a-zA-Z0-9]", "").toLowerCase() + "@example.com";
-            
-            // Generate a random phone number with Jeonbuk area code (063)
-            int telMiddle = 1000 + random.nextInt(9000);
-            int telLast = random.nextInt(10000);
-            String tel = String.format("063-%04d-%04d", telMiddle, telLast);
-
-            // Generate a random cell phone number in the format 010-XXXX-XXXX
-            int cellMiddle = 1000 + random.nextInt(9000);
-            int cellLast = random.nextInt(10000);
-            String cellno = String.format("010-%04d-%04d", cellMiddle, cellLast);
-
+            String tel = randomPhone(random, "063");     // 전북 지역번호
+            String cellno = randomPhone(random, "010");
             String department = DEPARTMENTS.get(random.nextInt(DEPARTMENTS.size()));
             String team = TEAMS.get(random.nextInt(TEAMS.size()));
-            
+
             users.add(new User(id, name, email, tel, cellno, department, team));
         }
         return users;
+    }
+
+    /** {@code prefix-XXXX-XXXX} 형식의 랜덤 전화번호를 생성한다. */
+    private String randomPhone(Random random, String prefix) {
+        return String.format("%s-%04d-%04d", prefix, 1000 + random.nextInt(9000), random.nextInt(10000));
     }
 }
