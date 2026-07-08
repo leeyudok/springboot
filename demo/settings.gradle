@@ -1,1 +1,6 @@
+plugins {
+    // 로컬에 JDK 8 없으면 toolchain 이 자동 다운로드하도록 하는 리졸버
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.10.0'
+}
+
 rootProject.name = 'demo'

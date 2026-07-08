@@ -4,13 +4,14 @@ import com.example.demo.dto.User;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 @Service
 public class UserService {
 
-    private static final List<String> KOREAN_SINGER_NAMES = List.of(
+    private static final List<String> KOREAN_SINGER_NAMES = Arrays.asList(
             "K.Will", "카이 (Kai)", "강다니엘 (Kang Daniel)", "강승윤 (Kang Seung-yoon)", "강타 (Kangta)",
             "키 (Key)", "기현 (Kihyun)", "김동한 (Kim Dong-han)", "김동준 (Kim Dong-jun)", "에디킴 (Eddy Kim)",
             "지드래곤 (G-Dragon)", "지오 (G.O)", "지소울 (G.Soul)", "개코 (Gaeko)", "가호 (Gaho)",
@@ -23,8 +24,8 @@ public class UserService {
             "마커스 카바이스 (Marcus Cabais)", "차은우 (Cha Eun-woo)", "차훈 (Cha Hun)", "차인하 (Cha In-ha)", "채보훈 (Chae Bo-hun)"
     );
 
-    private static final List<String> DEPARTMENTS = List.of("개발부", "기획부", "디자인부", "마케팅부", "인사부");
-    private static final List<String> TEAMS = List.of("A팀", "B팀", "C팀", "D팀", "E팀");
+    private static final List<String> DEPARTMENTS = Arrays.asList("개발부", "기획부", "디자인부", "마케팅부", "인사부");
+    private static final List<String> TEAMS = Arrays.asList("A팀", "B팀", "C팀", "D팀", "E팀");
 
     public List<User> getUsers() {
         List<User> users = new ArrayList<>();
