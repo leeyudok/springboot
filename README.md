@@ -7,7 +7,8 @@ Spring Boot 연습 프로젝트. 실제 애플리케이션은 `demo/` 디렉터�
 - Spring Boot **2.7.18** (Java 8을 지원하는 마지막 버전)
 - Java **8** — Gradle toolchain 으로 고정. 로컬에 JDK 8이 없으면 foojay resolver 가 자동 다운로드
 - Gradle Wrapper **8.14.3** (`demo/gradlew`)
-- Lombok, spring-boot-devtools, springdoc-openapi-ui 1.7.0 (Swagger)
+- Lombok **1.18.38**, spring-boot-devtools, springdoc-openapi-ui **1.8.0** (Swagger)
+- logback **1.2.13** — 1.3+ 는 SLF4J 2.0 기반이라 Boot 2.x 미지원, 1.2 라인 최종 고정
 
 ## 실행
 
