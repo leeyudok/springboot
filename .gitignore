@@ -11,7 +11,5 @@ demo/target/
 
 
 .gradle/
-gradle/
-gradlew
-gradlew.bat
 demo/users.json
+lastworks.resume
