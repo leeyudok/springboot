@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      leak-detection-threshold: 2000
+  flyway:
+    enabled: true
+    clean-disabled: false
+    locations: classpath:db/migration     # 운영과 동일한 마이그레이션 + 시드 사용
+
+logging:
+  level:
+    root: WARN
+    com.example.demo: INFO
+
+app:
+  jwt:
+    secret: dGVzdC1vbmx5LXNlY3JldC1rZXktZm9yLWludGVncmF0aW9uLXRlc3RzLTMy
+    issuer: demo-api
+    access-token-validity-seconds: 600
+    refresh-token-validity-seconds: 1200
+  audit:
+    enabled: true

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 테스트 전용 SQL — 운영 매퍼에 두면 안 되는 조작(생성 시각 지정)을 격리한다. -->
+<mapper namespace="com.example.demo.support.TestAuditMapper">
+
+    <insert id="insertWithCreatedAt" parameterType="com.example.demo.common.audit.AuditLog">
+        INSERT INTO audit_log (trace_id, event_type, actor, result, created_at)
+        VALUES (#{traceId}, #{eventType}, #{actor}, #{result}, #{createdAt})
+    </insert>
+
+    <select id="countByEventType" resultType="long">
+        SELECT COUNT(*) FROM audit_log WHERE event_type = #{eventType}
+    </select>
+
+</mapper>

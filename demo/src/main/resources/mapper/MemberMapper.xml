@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+  회원 SQL.
+  - 컬럼은 * 대신 항상 명시한다 (스키마 변경 시 조용한 오작동 방지, 불필요한 컬럼 전송 차단).
+  - 조회 조건은 <if> 로 감싸되, 인덱스를 못 타는 선행 와일드카드(%값)는 최소화한다.
+-->
+<mapper namespace="com.example.demo.domain.member.MemberMapper">
+
+    <sql id="memberColumns">
+        member_id, login_id, member_name, email, cell_no, role, status,
+        login_fail_cnt, last_login_at, created_at, created_by, updated_at, updated_by
+    </sql>
+
+    <!-- 인증 전용 — 비밀번호 해시를 포함하므로 다른 조회에서 재사용하지 않는다. -->
+    <select id="selectByLoginId" resultType="com.example.demo.domain.member.Member">
+        SELECT <include refid="memberColumns"/>, password
+          FROM member
+         WHERE login_id = #{loginId}
+    </select>
+
+    <select id="selectById" resultType="com.example.demo.domain.member.Member">
+        SELECT <include refid="memberColumns"/>
+          FROM member
+         WHERE member_id = #{memberId}
+    </select>
+
+    <sql id="listConditions">
+        <where>
+            <if test="memberName != null and memberName != ''">
+                AND member_name LIKE '%' || #{memberName} || '%'
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+    </sql>
+
+    <!--
+      정렬은 허용 목록 분기로만 만들어 낸다.
+      컬럼명·정렬방향은 #{} 로 바인딩할 수 없고 ${} 로 이어 붙이면 SQL 인젝션이 되므로,
+      클라이언트가 보낸 키를 <choose> 로 검사해 정해진 ORDER BY 절만 emit 한다.
+      목록에 없는 값이 오면 자동으로 기본 정렬(otherwise)로 떨어진다.
+    -->
+    <sql id="listOrderBy">
+        <choose>
+            <when test="sort == 'name'">ORDER BY member_name ASC, member_id DESC</when>
+            <when test="sort == 'lastLogin'">ORDER BY last_login_at DESC NULLS LAST, member_id DESC</when>
+            <when test="sort == 'oldest'">ORDER BY member_id ASC</when>
+            <otherwise>ORDER BY member_id DESC</otherwise>
+        </choose>
+    </sql>
+
+    <select id="selectList" resultType="com.example.demo.domain.member.Member">
+        SELECT <include refid="memberColumns"/>
+          FROM member
+        <include refid="listConditions"/>
+        <include refid="listOrderBy"/>
+         LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="countList" resultType="long">
+        SELECT COUNT(*)
+          FROM member
+        <include refid="listConditions"/>
+    </select>
+
+    <select id="countByLoginId" resultType="int">
+        SELECT COUNT(*)
+          FROM member
+         WHERE login_id = #{loginId}
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.domain.member.Member"
+            useGeneratedKeys="true" keyProperty="memberId" keyColumn="member_id">
+        INSERT INTO member (
+            login_id, password, member_name, email, cell_no, reg_no, role, status, created_at, created_by
+        ) VALUES (
+            #{loginId}, #{password}, #{memberName}, #{email}, #{cellNo}, #{regNo},
+            #{role}, #{status}, now(), #{createdBy}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.domain.member.Member">
+        UPDATE member
+           SET member_name = #{memberName},
+               email       = #{email},
+               cell_no     = #{cellNo},
+               updated_at  = now(),
+               updated_by  = #{updatedBy}
+         WHERE member_id = #{memberId}
+    </update>
+
+    <update id="updateLoginSuccess">
+        UPDATE member
+           SET last_login_at   = now(),
+               login_fail_cnt  = 0,
+               updated_at      = now()
+         WHERE member_id = #{memberId}
+    </update>
+
+    <!--
+      실패 횟수를 DB 에서 증가시키고, 임계 도달 시 같은 문장에서 상태를 잠금으로 바꾼다.
+      애플리케이션에서 읽고-더해서-쓰면 동시 로그인 시도에서 카운트가 유실된다.
+    -->
+    <update id="updateLoginFailure">
+        UPDATE member
+           SET login_fail_cnt = login_fail_cnt + 1,
+               status = CASE WHEN login_fail_cnt + 1 >= #{maxFailCount} THEN 'LOCKED' ELSE status END,
+               updated_at = now()
+         WHERE login_id = #{loginId}
+    </update>
+
+</mapper>

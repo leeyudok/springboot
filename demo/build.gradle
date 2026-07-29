@@ -14,39 +14,94 @@ java {
     }
 }
 
+ext {
+    mybatisStarterVersion = '2.3.2'   // Boot 2.7 / Java 8 대응 마지막 라인
+    postgresqlVersion = '42.7.5'      // 42.7.x 는 Java 8 런타임 지원
+    jjwtVersion = '0.11.5'            // 0.12+ 는 Java 8 미지원 API 사용
+    springdocVersion = '1.8.0'        // Boot 2.x(Java 8)용 1.x 라인 최종
+    logbackVersion = '1.2.13'         // 1.3+ 는 SLF4J 2.0 기반 → Boot 2.x 미지원
+    testcontainersVersion = '1.19.8'  // 1.20+ 는 Java 17 요구
+    caffeineVersion = '2.9.3'         // 3.x 는 Java 11+ 요구
+}
 
+configurations {
+    // 전 스타터 공통으로 기본 로깅 스타터 제외 (logback 1.2 라인 직접 고정)
+    all*.exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    compileOnly.extendsFrom annotationProcessor
+}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation('org.springframework.boot:spring-boot-starter-web') {
-        exclude module: 'spring-boot-starter-logging'
-    }
-    // logback 1.3+ 는 SLF4J 2.0 필요 → Spring Boot 2.x 미지원, 1.2 라인 최종 버전 고정
-    implementation 'ch.qos.logback:logback-classic:1.2.13'
-    compileOnly 'org.projectlombok:lombok:1.18.38'
-    annotationProcessor 'org.projectlombok:lombok:1.18.38'
-    implementation 'org.springframework.boot:spring-boot-devtools'
-    implementation 'org.springdoc:springdoc-openapi-ui:1.8.0' // Boot 2.x(Java 8)용 1.x 라인 최종
+    // --- web / 공통 ---
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation "ch.qos.logback:logback-classic:${logbackVersion}"
+    implementation "org.springdoc:springdoc-openapi-ui:${springdocVersion}"
+
+    // --- 보안 / JWT ---
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
+
+    // --- 캐시 / 스케줄러 ---
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation "com.github.ben-manes.caffeine:caffeine:${caffeineVersion}"
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
+
+    // --- 영속 계층 ---
+    implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:${mybatisStarterVersion}"
+    implementation 'org.flywaydb:flyway-core' // Boot 2.7 관리 버전 8.5.x (Java 8 지원)
+    runtimeOnly "org.postgresql:postgresql:${postgresqlVersion}"
+
+    // --- 코드 생성 ---
+    annotationProcessor 'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok'
+
+    // --- 개발 편의 ---
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // --- 테스트 ---
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation "org.mybatis.spring.boot:mybatis-spring-boot-starter-test:${mybatisStarterVersion}"
+    testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
+    testImplementation "org.testcontainers:postgresql:${testcontainersVersion}"
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
 }
 
 bootRun {
-    systemProperties = [ 'file.encoding': 'UTF-8' ]
+    systemProperties = ['file.encoding': 'UTF-8']
     sourceResources sourceSets.main
 }
 
 test {
     useJUnitPlatform()
-    options {
-        systemProperties(System.getProperties())
-        systemProperties.remove("java.awt.headless")
-    }
     systemProperty 'file.encoding', 'UTF-8'
+
+    // Testcontainers 컨테이너 정리는 IntegrationTestSupport 의 종료 훅이 담당한다.
+    // Ryuk(정리 사이드카)은 rootless podman 에서 기동에 실패하므로 끈다.
+    environment 'TESTCONTAINERS_RYUK_DISABLED', 'true'
+
+    // podman 사용 시 셸에서 DOCKER_HOST 를 지정하면 그대로 전달된다 (README 참고).
+    if (System.getenv('DOCKER_HOST') != null) {
+        environment 'DOCKER_HOST', System.getenv('DOCKER_HOST')
+    }
+
+    testLogging {
+        events 'failed'
+        exceptionFormat 'short'
+    }
 }
 
-tasks.withType(JavaCompile){
-    options.encoding = "UTF-8"
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    // 파라미터명 보존 — MyBatis @Param 생략 시, Spring MVC 바인딩 시 필요
+    options.compilerArgs << '-parameters'
 }

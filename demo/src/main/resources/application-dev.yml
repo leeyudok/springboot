@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:demodb}?ApplicationName=demo-api
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+  flyway:
+    clean-disabled: true
+
+logging:
+  level:
+    root: INFO
+    com.example.demo: DEBUG

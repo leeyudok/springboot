@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 감사 로그 SQL. 적재는 append-only 이며 UPDATE/DELETE 문을 두지 않는다 (변조 방지). -->
+<mapper namespace="com.example.demo.common.audit.AuditLogMapper">
+
+    <sql id="auditColumns">
+        audit_id, trace_id, event_type, actor, client_ip, http_method, request_uri,
+        target_id, params, result, error_code, error_message, elapsed_ms, created_at
+    </sql>
+
+    <insert id="insert" parameterType="com.example.demo.common.audit.AuditLog"
+            useGeneratedKeys="true" keyProperty="auditId" keyColumn="audit_id">
+        INSERT INTO audit_log (
+            trace_id, event_type, actor, client_ip, http_method, request_uri,
+            target_id, params, result, error_code, error_message, elapsed_ms, created_at
+        ) VALUES (
+            #{traceId}, #{eventType}, #{actor}, #{clientIp}, #{httpMethod}, #{requestUri},
+            #{targetId}, #{params}, #{result}, #{errorCode}, #{errorMessage}, #{elapsedMs}, now()
+        )
+    </insert>
+
+    <select id="selectByActor" resultType="com.example.demo.common.audit.AuditLog">
+        SELECT <include refid="auditColumns"/>
+          FROM audit_log
+         WHERE actor = #{actor}
+         ORDER BY created_at DESC, audit_id DESC
+         LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="selectByTraceId" resultType="com.example.demo.common.audit.AuditLog">
+        SELECT <include refid="auditColumns"/>
+          FROM audit_log
+         WHERE trace_id = #{traceId}
+         ORDER BY audit_id
+    </select>
+
+    <!--
+      보존기간 정리 — PostgreSQL DELETE 에는 LIMIT 절이 없으므로 PK 서브쿼리로 상한을 건다.
+      ix_audit_created 인덱스를 타고 오래된 것부터 지운다.
+    -->
+    <delete id="deleteOlderThan">
+        DELETE FROM audit_log
+         WHERE audit_id IN (
+                   SELECT audit_id
+                     FROM audit_log
+                    WHERE created_at &lt; #{cutoff}
+                    ORDER BY created_at
+                    LIMIT #{limit}
+               )
+    </delete>
+
+</mapper>

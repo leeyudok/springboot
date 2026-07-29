@@ -1,13 +1,28 @@
-server:
-  port: 8000
 spring:
+  datasource:
+    # docker-compose.yml 의 PostgreSQL (호스트 5433 노출)
+    url: jdbc:postgresql://localhost:5433/demodb?ApplicationName=demo-api&currentSchema=public
+    username: ${DB_USERNAME:demo}
+    password: ${DB_PASSWORD:demo1234}
+  flyway:
+    clean-disabled: false
   devtools:
-      restart:
-        enabled: true
-        additional-paths: src/main/resources/static
-      livereload:
-        enabled: true
+    restart:
+      enabled: true
+      additional-paths: src/main/resources/static
+    livereload:
+      enabled: true
   web:
     resources:
+      add-mappings: true    # 로컬에서는 static/ 서빙 필요
       cache:
         period: 0
+
+server:
+  port: 8000
+
+logging:
+  level:
+    root: INFO
+    com.example.demo: DEBUG
+    org.springframework.jdbc.datasource: DEBUG
