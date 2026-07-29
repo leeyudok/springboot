@@ -1,11 +1,11 @@
-package com.example.demo.domain.account;
+package com.example.demo.sample.ledger;
 
 import com.example.demo.common.response.ApiResponse;
 import com.example.demo.common.response.PageRequestDto;
 import com.example.demo.common.response.PageResponse;
-import com.example.demo.domain.account.dto.AccountResponse;
-import com.example.demo.domain.account.dto.TransferRequest;
-import com.example.demo.domain.account.dto.TransferResponse;
+import com.example.demo.sample.ledger.dto.AccountResponse;
+import com.example.demo.sample.ledger.dto.TransferRequest;
+import com.example.demo.sample.ledger.dto.TransferResponse;
 import com.example.demo.security.jwt.AuthenticatedMember;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

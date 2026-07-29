@@ -1,12 +1,10 @@
 package com.example.demo.security;
 
 import com.example.demo.security.jwt.JwtAuthenticationFilter;
-import com.example.demo.security.jwt.JwtProperties;
 import com.example.demo.security.jwt.JwtTokenProvider;
 import com.example.demo.security.jwt.RestAccessDeniedHandler;
 import com.example.demo.security.jwt.RestAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -33,10 +31,22 @@ import java.util.Arrays;
  *       쿠키 기반으로 바꾸면 반드시 다시 켜야 한다.</li>
  *   <li><b>기본 거부</b> — 명시적으로 permitAll 한 경로 외에는 전부 인증을 요구한다.</li>
  * </ul>
+ *
+ * <p><b>CORS 와 401 의 상호작용</b> — 브라우저 클라이언트가 붙는 순간 반복해서 터지는 조합이라 근거를 남긴다.
+ * <ol>
+ *   <li>CORS 는 {@code WebMvcConfigurer#addCorsMappings} 가 아니라 <b>필터</b>로 건다.
+ *       여기서는 {@code http.cors()} 가 시큐리티 필터체인 앞쪽에 {@code CorsFilter} 를 심으므로
+ *       인증 실패로 응답이 조기 종료돼도 CORS 헤더가 이미 붙어 있다.
+ *       MVC 매핑 방식은 요청이 컨트롤러까지 도달해야 적용되므로, 인증 단계에서 끊기면
+ *       브라우저에는 CORS 오류로 보인다.</li>
+ *   <li>401 응답은 {@link RestAuthenticationEntryPoint} 가 <b>직접 본문을 쓴다</b>.
+ *       {@code sendError} 를 쓰면 컨테이너가 {@code /error} 로 forward 하는데,
+ *       그 경로는 CORS 매핑 밖이라 응답이 브라우저 단에서 깨진다.</li>
+ *   <li>프리플라이트({@code OPTIONS})는 인증 자격을 싣지 않으므로 반드시 열어 둔다 (아래 permitAll).</li>
+ * </ol>
  */
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties(JwtProperties.class)
 @EnableGlobalMethodSecurity(prePostEnabled = true)   // 서비스 계층 @PreAuthorize 사용
 public class SecurityConfig {
 

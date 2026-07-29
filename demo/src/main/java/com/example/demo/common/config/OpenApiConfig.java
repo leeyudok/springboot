@@ -28,8 +28,8 @@ public class OpenApiConfig {
 
         return new OpenAPI()
                 .info(new Info()
-                        .title("Demo Financial API")
-                        .description("금융권 공통 API 베이스 — 표준 응답 / 거래추적 / 감사로그 / JWT 인증")
+                        .title("Demo API")
+                        .description("공통 API 베이스 — 표준 응답 / 요청추적 / 감사로그 / JWT 인증")
                         .version("v1"))
                 .components(new Components().addSecuritySchemes(BEARER_SCHEME, bearer))
                 .addSecurityItem(new SecurityRequirement().addList(BEARER_SCHEME));

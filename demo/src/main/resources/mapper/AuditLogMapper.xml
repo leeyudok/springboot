@@ -35,4 +35,19 @@
          ORDER BY audit_id
     </select>
 
+    <!--
+      보존기간 정리 — PostgreSQL DELETE 에는 LIMIT 절이 없으므로 PK 서브쿼리로 상한을 건다.
+      ix_audit_created 인덱스를 타고 오래된 것부터 지운다.
+    -->
+    <delete id="deleteOlderThan">
+        DELETE FROM audit_log
+         WHERE audit_id IN (
+                   SELECT audit_id
+                     FROM audit_log
+                    WHERE created_at &lt; #{cutoff}
+                    ORDER BY created_at
+                    LIMIT #{limit}
+               )
+    </delete>
+
 </mapper>

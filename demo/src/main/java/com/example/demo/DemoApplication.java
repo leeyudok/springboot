@@ -3,6 +3,7 @@ package com.example.demo;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 /**
  * 애플리케이션 진입점.
@@ -19,6 +20,7 @@ import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServic
  * 운영 로그에 자격증명이 찍히는 것도 바람직하지 않다.
  */
 @SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
+@ConfigurationPropertiesScan
 public class DemoApplication {
 
     public static void main(String[] args) {

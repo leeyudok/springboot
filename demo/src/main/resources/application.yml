@@ -34,6 +34,19 @@ spring:
     baseline-on-migrate: true
     locations: classpath:db/migration
     validate-on-migrate: true
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never     # 스키마는 Flyway V5 가 관리한다 (Quartz 내장 스크립트는 DROP 을 포함)
+    overwrite-existing-jobs: true  # 코드의 잡 정의를 기동 시 DB 에 반영
+    properties:
+      org.quartz.scheduler.instanceName: demo-scheduler
+      org.quartz.scheduler.instanceId: AUTO          # 클러스터에서 인스턴스 자동 식별
+      org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+      org.quartz.jobStore.isClustered: true          # 여러 대를 띄워도 잡은 한 번만 실행된다
+      org.quartz.jobStore.clusterCheckinInterval: 20000
+      org.quartz.jobStore.misfireThreshold: 60000
+      org.quartz.threadPool.threadCount: 5
 
 server:
   port: 8000
@@ -55,7 +68,10 @@ server:
 
 mybatis:
   type-aliases-package: com.example.demo
-  mapper-locations: classpath:mapper/**/*.xml
+  # classpath* (별표) 필수 — 별표가 없으면 'mapper/' 를 가진 클래스패스 루트 중 '처음 하나'만 훑는다.
+  # 테스트 리소스에도 mapper/ 가 있으면 운영 매퍼 XML 이 통째로 무시되어
+  # "Invalid bound statement (not found)" 로 터진다.
+  mapper-locations: classpath*:mapper/**/*.xml
   configuration:
     map-underscore-to-camel-case: true    # member_id → memberId
     jdbc-type-for-null: NULL              # PostgreSQL 은 OTHER 로 넘기면 오류
@@ -92,5 +108,15 @@ app:
     prefix: "Bearer "
   audit:
     enabled: true
+    # 보존기간은 적용 도메인의 법정 요건에 맞춰 재검토할 것 (기본 1년은 범용 기준값)
+    retention-days: 365
+    retention-enabled: true
+    retention-cron: "0 30 3 * * ?"   # 매일 03:30
+    retention-chunk-size: 1000       # 청크로 끊어 롱 트랜잭션·락 경합 회피
+    retention-chunk-delay-ms: 50
+    retention-max-rows-per-run: 500000
   trace:
     header: X-Trace-Id
+    # 리버스프록시가 '덮어쓰는' 헤더만 신뢰한다. 프록시 없이 직접 노출되면 반드시 빈 값으로 둘 것.
+    # X-Forwarded-For 는 클라이언트가 앞에 값을 붙일 수 있어 신뢰 대상이 아니다 (TraceProperties 주석 참고).
+    client-ip-header: X-Real-IP

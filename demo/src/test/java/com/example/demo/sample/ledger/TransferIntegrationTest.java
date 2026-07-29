@@ -1,4 +1,4 @@
-package com.example.demo.domain.account;
+package com.example.demo.sample.ledger;
 
 import com.example.demo.support.IntegrationTestSupport;
 import com.fasterxml.jackson.databind.JsonNode;

@@ -1,6 +1,6 @@
-package com.example.demo.domain.account.dto;
+package com.example.demo.sample.ledger.dto;
 
-import com.example.demo.domain.account.Account;
+import com.example.demo.sample.ledger.Account;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

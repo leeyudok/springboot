@@ -1,4 +1,4 @@
-package com.example.demo.domain.account;
+package com.example.demo.sample.ledger;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

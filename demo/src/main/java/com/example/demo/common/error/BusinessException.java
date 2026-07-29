@@ -13,12 +13,12 @@ public class BusinessException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    private final ErrorCode errorCode;
+    private final ErrorCodeSpec errorCode;
 
     /** 로그·감사용 상세 사유 (대외 응답에는 포함하지 않는다). */
     private final String detail;
 
-    public BusinessException(ErrorCode errorCode) {
+    public BusinessException(ErrorCodeSpec errorCode) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
         this.detail = null;
@@ -27,13 +27,13 @@ public class BusinessException extends RuntimeException {
     /**
      * @param detail 내부 조사용 상세 사유 — 계좌번호·잔액 등 민감정보는 마스킹해서 넘길 것
      */
-    public BusinessException(ErrorCode errorCode, String detail) {
+    public BusinessException(ErrorCodeSpec errorCode, String detail) {
         super(errorCode.getMessage() + " (" + detail + ")");
         this.errorCode = errorCode;
         this.detail = detail;
     }
 
-    public BusinessException(ErrorCode errorCode, String detail, Throwable cause) {
+    public BusinessException(ErrorCodeSpec errorCode, String detail, Throwable cause) {
         super(errorCode.getMessage() + " (" + detail + ")", cause);
         this.errorCode = errorCode;
         this.detail = detail;

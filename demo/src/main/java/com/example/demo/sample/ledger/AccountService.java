@@ -1,14 +1,13 @@
-package com.example.demo.domain.account;
+package com.example.demo.sample.ledger;
 
 import com.example.demo.common.audit.Auditable;
 import com.example.demo.common.error.BusinessException;
-import com.example.demo.common.error.ErrorCode;
 import com.example.demo.common.response.PageRequestDto;
 import com.example.demo.common.response.PageResponse;
 import com.example.demo.common.trace.TraceContext;
-import com.example.demo.domain.account.dto.AccountResponse;
-import com.example.demo.domain.account.dto.TransferRequest;
-import com.example.demo.domain.account.dto.TransferResponse;
+import com.example.demo.sample.ledger.dto.AccountResponse;
+import com.example.demo.sample.ledger.dto.TransferRequest;
+import com.example.demo.sample.ledger.dto.TransferResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -62,10 +61,10 @@ public class AccountService {
     public AccountResponse getAccount(Long memberId, String accountNo) {
         Account account = accountMapper.selectByAccountNo(accountNo);
         if (account == null) {
-            throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, "accountNo=" + accountNo);
+            throw new BusinessException(LedgerErrorCode.ACCOUNT_NOT_FOUND, "accountNo=" + accountNo);
         }
         if (!account.isOwnedBy(memberId)) {
-            throw new BusinessException(ErrorCode.NOT_ACCOUNT_OWNER, "memberId=" + memberId);
+            throw new BusinessException(LedgerErrorCode.NOT_ACCOUNT_OWNER, "memberId=" + memberId);
         }
         return AccountResponse.from(account);
     }
@@ -74,10 +73,10 @@ public class AccountService {
     public PageResponse<TransferHistory> getTransferHistory(Long memberId, String accountNo, PageRequestDto pageRequest) {
         Account account = accountMapper.selectByAccountNo(accountNo);
         if (account == null) {
-            throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, "accountNo=" + accountNo);
+            throw new BusinessException(LedgerErrorCode.ACCOUNT_NOT_FOUND, "accountNo=" + accountNo);
         }
         if (!account.isOwnedBy(memberId)) {
-            throw new BusinessException(ErrorCode.NOT_ACCOUNT_OWNER, "memberId=" + memberId);
+            throw new BusinessException(LedgerErrorCode.NOT_ACCOUNT_OWNER, "memberId=" + memberId);
         }
 
         long total = accountMapper.countTransferHistory(accountNo);
@@ -95,17 +94,18 @@ public class AccountService {
      * 호출자가 떠안아야 해서 단순 이체에는 과하다.
      */
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    @Auditable(eventType = "TRANSFER", targetExpression = "fromAccountNo")
+    @Auditable(eventType = "TRANSFER", targetExpression = "fromAccountNo",
+            params = {"fromAccountNo", "toAccountNo", "amount"})
     public TransferResponse transfer(Long memberId, TransferRequest request) {
         String fromAccountNo = request.getFromAccountNo();
         String toAccountNo = request.getToAccountNo();
         BigDecimal amount = request.getAmount();
 
         if (fromAccountNo.equals(toAccountNo)) {
-            throw new BusinessException(ErrorCode.SAME_ACCOUNT_TRANSFER, "accountNo=" + fromAccountNo);
+            throw new BusinessException(LedgerErrorCode.SAME_ACCOUNT_TRANSFER, "accountNo=" + fromAccountNo);
         }
         if (amount.compareTo(TRANSFER_LIMIT) > 0) {
-            throw new BusinessException(ErrorCode.TRANSFER_LIMIT_EXCEEDED, "amount=" + amount);
+            throw new BusinessException(LedgerErrorCode.TRANSFER_LIMIT_EXCEEDED, "amount=" + amount);
         }
 
         // (2) 교착 방지 — 계좌번호 사전순으로 잠금 순서를 고정한다.
@@ -144,27 +144,27 @@ public class AccountService {
 
     private void validateTransfer(Long memberId, Account fromAccount, Account toAccount, BigDecimal amount) {
         if (fromAccount == null) {
-            throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, "from account not found");
+            throw new BusinessException(LedgerErrorCode.ACCOUNT_NOT_FOUND, "from account not found");
         }
         if (toAccount == null) {
-            throw new BusinessException(ErrorCode.ACCOUNT_NOT_FOUND, "to account not found");
+            throw new BusinessException(LedgerErrorCode.ACCOUNT_NOT_FOUND, "to account not found");
         }
         if (!fromAccount.isOwnedBy(memberId)) {
-            throw new BusinessException(ErrorCode.NOT_ACCOUNT_OWNER, "memberId=" + memberId);
+            throw new BusinessException(LedgerErrorCode.NOT_ACCOUNT_OWNER, "memberId=" + memberId);
         }
         if (!fromAccount.isActive()) {
-            throw new BusinessException(ErrorCode.ACCOUNT_NOT_ACTIVE, "from status=" + fromAccount.getStatus());
+            throw new BusinessException(LedgerErrorCode.ACCOUNT_NOT_ACTIVE, "from status=" + fromAccount.getStatus());
         }
         if (!toAccount.isActive()) {
-            throw new BusinessException(ErrorCode.ACCOUNT_NOT_ACTIVE, "to status=" + toAccount.getStatus());
+            throw new BusinessException(LedgerErrorCode.ACCOUNT_NOT_ACTIVE, "to status=" + toAccount.getStatus());
         }
         if (!fromAccount.getCurrency().equals(toAccount.getCurrency())) {
-            throw new BusinessException(ErrorCode.CURRENCY_MISMATCH,
+            throw new BusinessException(LedgerErrorCode.CURRENCY_MISMATCH,
                     fromAccount.getCurrency() + "->" + toAccount.getCurrency());
         }
         // (4) 1차 방어선 — DB CHECK 제약이 2차 방어선이다.
         if (!fromAccount.hasBalanceFor(amount)) {
-            throw new BusinessException(ErrorCode.INSUFFICIENT_BALANCE, "requested=" + amount);
+            throw new BusinessException(LedgerErrorCode.INSUFFICIENT_BALANCE, "requested=" + amount);
         }
     }
 }

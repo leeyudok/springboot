@@ -1,6 +1,7 @@
 package com.example.demo.security.jwt;
 
 import com.example.demo.common.error.ErrorCode;
+import com.example.demo.common.error.ErrorCodeSpec;
 import com.example.demo.common.response.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
         Object attribute = request.getAttribute(JwtAuthenticationFilter.ATTR_AUTH_ERROR);
-        ErrorCode errorCode = (attribute instanceof ErrorCode) ? (ErrorCode) attribute : ErrorCode.UNAUTHENTICATED;
+        ErrorCodeSpec errorCode = (attribute instanceof ErrorCodeSpec) ? (ErrorCodeSpec) attribute : ErrorCode.UNAUTHENTICATED;
 
         response.setStatus(errorCode.getHttpStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

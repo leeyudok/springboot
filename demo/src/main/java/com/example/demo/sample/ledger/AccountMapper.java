@@ -1,4 +1,4 @@
-package com.example.demo.domain.account;
+package com.example.demo.sample.ledger;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

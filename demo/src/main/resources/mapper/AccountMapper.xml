@@ -5,14 +5,14 @@
   계좌/이체 SQL.
   자금 이동 구간은 행 잠금(FOR UPDATE)과 DB 측 산술 갱신을 사용한다 — AccountService 주석 참고.
 -->
-<mapper namespace="com.example.demo.domain.account.AccountMapper">
+<mapper namespace="com.example.demo.sample.ledger.AccountMapper">
 
     <sql id="accountColumns">
         account_id, account_no, member_id, account_name, balance, currency, status,
         created_at, created_by, updated_at, updated_by
     </sql>
 
-    <select id="selectByMemberId" resultType="com.example.demo.domain.account.Account">
+    <select id="selectByMemberId" resultType="com.example.demo.sample.ledger.Account">
         SELECT <include refid="accountColumns"/>
           FROM account
          WHERE member_id = #{memberId}
@@ -20,7 +20,7 @@
          ORDER BY account_id
     </select>
 
-    <select id="selectByAccountNo" resultType="com.example.demo.domain.account.Account">
+    <select id="selectByAccountNo" resultType="com.example.demo.sample.ledger.Account">
         SELECT <include refid="accountColumns"/>
           FROM account
          WHERE account_no = #{accountNo}
@@ -30,7 +30,7 @@
       행 잠금 조회. 반드시 트랜잭션 안에서 호출한다.
       NOWAIT 를 붙이면 대기 없이 즉시 실패하지만, 짧은 이체 트랜잭션에서는 대기가 정상 동작이므로 사용하지 않는다.
     -->
-    <select id="selectByAccountNoForUpdate" resultType="com.example.demo.domain.account.Account">
+    <select id="selectByAccountNoForUpdate" resultType="com.example.demo.sample.ledger.Account">
         SELECT <include refid="accountColumns"/>
           FROM account
          WHERE account_no = #{accountNo}
@@ -45,7 +45,7 @@
          WHERE account_no = #{accountNo}
     </update>
 
-    <insert id="insertTransferHistory" parameterType="com.example.demo.domain.account.TransferHistory"
+    <insert id="insertTransferHistory" parameterType="com.example.demo.sample.ledger.TransferHistory"
             useGeneratedKeys="true" keyProperty="transferId" keyColumn="transfer_id">
         INSERT INTO transfer_history (
             trace_id, from_account_no, to_account_no, amount, fee, currency, status, memo, created_at, created_by
@@ -55,7 +55,7 @@
         )
     </insert>
 
-    <select id="selectTransferHistory" resultType="com.example.demo.domain.account.TransferHistory">
+    <select id="selectTransferHistory" resultType="com.example.demo.sample.ledger.TransferHistory">
         SELECT transfer_id, trace_id, from_account_no, to_account_no, amount, fee,
                currency, status, memo, created_at, created_by
           FROM transfer_history

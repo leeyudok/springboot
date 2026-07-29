@@ -1,6 +1,6 @@
 package com.example.demo.common.response;
 
-import com.example.demo.common.error.ErrorCode;
+import com.example.demo.common.error.ErrorCodeSpec;
 import com.example.demo.common.trace.TraceContext;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -80,17 +80,17 @@ public class ApiResponse<T> {
     }
 
     /** 에러코드 기본 메시지를 사용하는 실패 응답. */
-    public static <T> ApiResponse<T> error(ErrorCode errorCode) {
+    public static <T> ApiResponse<T> error(ErrorCodeSpec errorCode) {
         return new ApiResponse<T>(false, errorCode.getCode(), errorCode.getMessage(), null);
     }
 
     /** 메시지를 재정의한 실패 응답. */
-    public static <T> ApiResponse<T> error(ErrorCode errorCode, String message) {
+    public static <T> ApiResponse<T> error(ErrorCodeSpec errorCode, String message) {
         return new ApiResponse<T>(false, errorCode.getCode(), message, null);
     }
 
     /** 상세 정보(검증 오류 목록 등)를 함께 담은 실패 응답. */
-    public static <T> ApiResponse<T> error(ErrorCode errorCode, String message, T data) {
+    public static <T> ApiResponse<T> error(ErrorCodeSpec errorCode, String message, T data) {
         return new ApiResponse<T>(false, errorCode.getCode(), message, data);
     }
 }

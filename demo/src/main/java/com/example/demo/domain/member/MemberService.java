@@ -2,7 +2,6 @@ package com.example.demo.domain.member;
 
 import com.example.demo.common.audit.Auditable;
 import com.example.demo.common.error.BusinessException;
-import com.example.demo.common.error.ErrorCode;
 import com.example.demo.common.response.PageRequestDto;
 import com.example.demo.common.response.PageResponse;
 import com.example.demo.common.trace.TraceContext;
@@ -43,7 +42,7 @@ public class MemberService {
         if (total == 0) {
             return PageResponse.of(pageRequest.getPage(), pageRequest.getSize(), 0, new ArrayList<MemberResponse>());
         }
-        List<Member> members = memberMapper.selectList(memberName, status,
+        List<Member> members = memberMapper.selectList(memberName, status, pageRequest.getSort(),
                 pageRequest.getOffset(), pageRequest.getSize());
 
         List<MemberResponse> content = new ArrayList<MemberResponse>(members.size());
@@ -57,7 +56,7 @@ public class MemberService {
     public MemberResponse getMember(Long memberId) {
         Member member = memberMapper.selectById(memberId);
         if (member == null) {
-            throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND, "memberId=" + memberId);
+            throw new BusinessException(MemberErrorCode.MEMBER_NOT_FOUND, "memberId=" + memberId);
         }
         return MemberResponse.from(member);
     }
@@ -69,10 +68,11 @@ public class MemberService {
      * 따라서 {@link DuplicateKeyException} 도 같은 업무 오류로 변환한다.
      */
     @Transactional
-    @Auditable(eventType = "MEMBER_CREATE", targetExpression = "loginId")
+    @Auditable(eventType = "MEMBER_CREATE", targetExpression = "loginId",
+            params = {"loginId", "memberName"})
     public MemberResponse createMember(MemberCreateRequest request) {
         if (memberMapper.countByLoginId(request.getLoginId()) > 0) {
-            throw new BusinessException(ErrorCode.DUPLICATE_LOGIN_ID, "loginId=" + request.getLoginId());
+            throw new BusinessException(MemberErrorCode.DUPLICATE_LOGIN_ID, "loginId=" + request.getLoginId());
         }
 
         Member member = Member.builder()
@@ -89,7 +89,7 @@ public class MemberService {
         try {
             memberMapper.insert(member);
         } catch (DuplicateKeyException e) {
-            throw new BusinessException(ErrorCode.DUPLICATE_LOGIN_ID, "loginId=" + request.getLoginId(), e);
+            throw new BusinessException(MemberErrorCode.DUPLICATE_LOGIN_ID, "loginId=" + request.getLoginId(), e);
         }
 
         log.info("[MEMBER] created. memberId={} loginId={}", member.getMemberId(), member.getLoginId());

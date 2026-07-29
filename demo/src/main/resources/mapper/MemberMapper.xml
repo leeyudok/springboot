@@ -37,11 +37,26 @@
         </where>
     </sql>
 
+    <!--
+      정렬은 허용 목록 분기로만 만들어 낸다.
+      컬럼명·정렬방향은 #{} 로 바인딩할 수 없고 ${} 로 이어 붙이면 SQL 인젝션이 되므로,
+      클라이언트가 보낸 키를 <choose> 로 검사해 정해진 ORDER BY 절만 emit 한다.
+      목록에 없는 값이 오면 자동으로 기본 정렬(otherwise)로 떨어진다.
+    -->
+    <sql id="listOrderBy">
+        <choose>
+            <when test="sort == 'name'">ORDER BY member_name ASC, member_id DESC</when>
+            <when test="sort == 'lastLogin'">ORDER BY last_login_at DESC NULLS LAST, member_id DESC</when>
+            <when test="sort == 'oldest'">ORDER BY member_id ASC</when>
+            <otherwise>ORDER BY member_id DESC</otherwise>
+        </choose>
+    </sql>
+
     <select id="selectList" resultType="com.example.demo.domain.member.Member">
         SELECT <include refid="memberColumns"/>
           FROM member
         <include refid="listConditions"/>
-         ORDER BY member_id DESC
+        <include refid="listOrderBy"/>
          LIMIT #{size} OFFSET #{offset}
     </select>
 

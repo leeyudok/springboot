@@ -36,7 +36,7 @@ public class AuthService {
     private final LoginAttemptService loginAttemptService;
 
     /** 로그인 — 성공 시 액세스/리프레시 토큰을 발급한다. */
-    @Auditable(eventType = "LOGIN", targetExpression = "loginId")
+    @Auditable(eventType = "LOGIN", targetExpression = "loginId", params = {"loginId"})
     public TokenResponse login(LoginRequest request) {
         // 감사로그·거래로그의 주체를 이 시점부터 확정한다 (실패해도 누가 시도했는지 남아야 함).
         TraceContext.setUserId(request.getLoginId());
@@ -67,7 +67,7 @@ public class AuthService {
      * <p>리프레시 토큰만으로 끝내지 않고 회원 상태를 다시 확인한다.
      * 토큰 발급 이후 계정이 잠기거나 해지됐다면 재발급을 막아야 하기 때문이다.
      */
-    @Auditable(eventType = "TOKEN_REFRESH", logParams = false)
+    @Auditable(eventType = "TOKEN_REFRESH")
     public TokenResponse refresh(RefreshRequest request) {
         Claims claims = jwtTokenProvider.parseRefreshToken(request.getRefreshToken());
         String loginId = claims.getSubject();

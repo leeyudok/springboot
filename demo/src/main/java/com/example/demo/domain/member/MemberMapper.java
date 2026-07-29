@@ -17,9 +17,14 @@ public interface MemberMapper {
     /** PK 로 회원 1건 조회. */
     Member selectById(@Param("memberId") Long memberId);
 
-    /** 회원 목록 조회 (이름 부분일치 + 상태 필터). */
+    /**
+     * 회원 목록 조회 (이름 부분일치 + 상태 필터).
+     *
+     * @param sort 정렬 키 — 매퍼 XML 의 허용 목록에 없는 값은 기본 정렬로 처리된다
+     */
     List<Member> selectList(@Param("memberName") String memberName,
                             @Param("status") String status,
+                            @Param("sort") String sort,
                             @Param("offset") int offset,
                             @Param("size") int size);
 

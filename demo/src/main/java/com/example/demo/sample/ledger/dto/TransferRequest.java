@@ -1,4 +1,4 @@
-package com.example.demo.domain.account.dto;
+package com.example.demo.sample.ledger.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;

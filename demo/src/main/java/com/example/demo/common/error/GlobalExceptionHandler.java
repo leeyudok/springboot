@@ -48,7 +48,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> handleBusiness(BusinessException e) {
-        ErrorCode errorCode = e.getErrorCode();
+        ErrorCodeSpec errorCode = e.getErrorCode();
         log.warn("[BUSINESS] code={} detail={}", errorCode.getCode(), SensitiveMasker.maskAll(e.getDetail()));
         return build(errorCode);
     }
@@ -185,7 +185,7 @@ public class GlobalExceptionHandler {
     // 내부 유틸
     // ---------------------------------------------------------------
 
-    private ResponseEntity<ApiResponse<Void>> build(ErrorCode errorCode) {
+    private ResponseEntity<ApiResponse<Void>> build(ErrorCodeSpec errorCode) {
         HttpStatus status = errorCode.getHttpStatus();
         return ResponseEntity.status(status).body(ApiResponse.<Void>error(errorCode));
     }
