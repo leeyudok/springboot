@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?ApplicationName=demo-api&ssl=${DB_SSL:false}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: ${DB_POOL_MAX:30}
+  flyway:
+    clean-disabled: true
+    validate-on-migrate: true
+
+logging:
+  level:
+    root: WARN
+    com.example.demo: INFO
+
+springdoc:
+  api-docs:
+    enabled: false     # 운영에서는 API 문서 비노출
+  swagger-ui:
+    enabled: false

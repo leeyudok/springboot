@@ -1,6 +1,40 @@
 spring:
   application:
-    name: demo-application
+    name: demo-api
+  profiles:
+    active: local
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+    deserialization:
+      fail-on-unknown-properties: false
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false   # 위 설정과 짝 — 미매핑 요청을 404 예외로 흘려보내기 위함
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      # 금융권 표준: 커넥션 누수/고갈을 조기에 드러내는 보수적 설정
+      pool-name: demo-hikari
+      minimum-idle: 5
+      maximum-pool-size: 20
+      connection-timeout: 3000      # 커넥션 획득 대기 3초 → 초과 시 즉시 실패
+      validation-timeout: 2000
+      idle-timeout: 300000          # 5분
+      max-lifetime: 900000          # 15분 (DB/LB 유휴 종료보다 짧게)
+      keepalive-time: 120000
+      leak-detection-threshold: 30000
+      connection-test-query: SELECT 1
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    validate-on-migrate: true
+
 server:
   port: 8000
   servlet:
@@ -8,3 +42,55 @@ server:
       charset: UTF-8
       enabled: true
       force: true
+  error:
+    include-message: never
+    include-stacktrace: never       # 운영 스택트레이스 노출 금지
+    whitelabel:
+      enabled: false
+  tomcat:
+    threads:
+      max: 200
+    accept-count: 100
+  shutdown: graceful                # 진행 중 거래를 끊지 않고 종료
+
+mybatis:
+  type-aliases-package: com.example.demo
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true    # member_id → memberId
+    jdbc-type-for-null: NULL              # PostgreSQL 은 OTHER 로 넘기면 오류
+    default-statement-timeout: 30         # 쿼리 30초 타임아웃
+    default-fetch-size: 100
+    call-setters-on-nulls: true
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: never
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui/index.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+
+app:
+  jwt:
+    # 운영에서는 반드시 환경변수(APP_JWT_SECRET)로 주입 — Base64 인코딩된 32바이트 이상
+    secret: ${APP_JWT_SECRET:ZGVtby1sb2NhbC1kZXZlbG9wbWVudC1vbmx5LXNlY3JldC1rZXktMzJieXRlcyE=}
+    issuer: demo-api
+    access-token-validity-seconds: 1800     # 30분
+    refresh-token-validity-seconds: 43200   # 12시간
+    header: Authorization
+    prefix: "Bearer "
+  audit:
+    enabled: true
+  trace:
+    header: X-Trace-Id
